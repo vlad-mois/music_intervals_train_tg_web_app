@@ -231,6 +231,58 @@
             margin: 10px 0;
         }
 
+        .hint-section {
+            margin: 20px 0;
+        }
+
+        .hint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s;
+        }
+
+        .hint-header:active {
+            opacity: 0.8;
+        }
+
+        .hint-header span:first-child {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .hint-arrow {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .hint-arrow.expanded {
+            transform: rotate(-180deg);
+        }
+
+        .hint-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .hint-content.expanded {
+            max-height: 1000px;
+        }
+
+        .hint-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-top: 12px;
+            border-radius: 8px;
+        }
+
         .progress-bar {
             height: 4px;
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -312,6 +364,18 @@
             <div class="button-group">
                 <button class="button secondary" onclick="app.showMenu()">← Меню</button>
                 <button class="button" onclick="app.submitAnswer()">Ответить</button>
+            </div>
+
+            <div class="hint-section">
+                <div class="hint-header" onclick="toggleHint()">
+                    <span>💡 Подсказка</span>
+                    <span class="hint-arrow" id="hint-arrow">▼</span>
+                </div>
+                <div class="hint-content" id="hint-content">
+                    <img src="https://vlad-mois.github.io/music_intervals_train_tg_web_app/notes-circle.jpeg"
+                         alt="Круг нот"
+                         class="hint-image">
+                </div>
             </div>
 
             <p class="help-text">Формат нот: C, C#, D, D#, E, F, F#, G, G#, A, A#, B<br>Можно использовать "." вместо "#"</p>
@@ -1112,6 +1176,18 @@
                 this.showScreen('stats-screen');
                 this.tg.BackButton.hide();
             }
+        }
+
+        // ============================================================================
+        // HINT TOGGLE FUNCTION
+        // ============================================================================
+
+        function toggleHint() {
+            const hintContent = document.getElementById('hint-content');
+            const hintArrow = document.getElementById('hint-arrow');
+
+            hintContent.classList.toggle('expanded');
+            hintArrow.classList.toggle('expanded');
         }
 
         // Initialize app when DOM is ready
