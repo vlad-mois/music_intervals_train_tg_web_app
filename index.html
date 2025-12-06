@@ -975,10 +975,25 @@
                 this._exerciseType = exerciseType;
                 this._statistics = new SessionStatistics();
                 this._currentExercise = null;
+                this._previousQuestion = null;
             }
 
             getNextExercise() {
-                this._currentExercise = ExerciseGenerator.generate(this._exerciseType);
+                let newExercise;
+                let attempts = 0;
+                const maxAttempts = 10;
+
+                do {
+                    newExercise = ExerciseGenerator.generate(this._exerciseType);
+                    attempts++;
+                } while (
+                    this._previousQuestion !== null &&
+                    newExercise.getQuestion() === this._previousQuestion &&
+                    attempts < maxAttempts
+                );
+
+                this._currentExercise = newExercise;
+                this._previousQuestion = newExercise.getQuestion();
                 return this._currentExercise;
             }
 
@@ -1003,6 +1018,7 @@
             reset() {
                 this._statistics.reset();
                 this._currentExercise = null;
+                this._previousQuestion = null;
             }
         }
 
