@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="MobileOptimized" content="176" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="robots" content="noindex,nofollow" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Тренировка интервалов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            color-scheme: var(--tg-color-scheme);
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 20px 0;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+        }
+
+        .menu-button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-align: left;
+        }
+
+        .menu-button:active {
+            opacity: 0.8;
+        }
+
+        .menu-button-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .menu-button-desc {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .exercise-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tablature {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .key-info {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 10px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--tg-theme-button-color, #3390ec);
+            border-radius: 12px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 18px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--tg-theme-link-color, #2481cc);
+        }
+
+        .feedback {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: 500;
+            z-index: 1000;
+            min-width: 200px;
+            max-width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .feedback.incorrect {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .stats-container {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #cccccc);
+        }
+
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+
+        .stats-label {
+            font-weight: 500;
+        }
+
+        .stats-value {
+            font-weight: 600;
+            color: var(--tg-theme-link-color, #2481cc);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .button:active {
+            opacity: 0.8;
+        }
+
+        .button.secondary {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .help-text {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            transition: width 0.3s;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .tablature {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Menu Screen -->
+        <div id="menu-screen" class="screen active">
+            <h1>🎵 Тренировка интервалов</h1>
+            <p class="help-text">Выберите тип упражнения:</p>
+
+            <button class="menu-button" onclick="app.startExercise('note_arithmetic')">
+                <div class="menu-button-title">🎹 Арифметика нот</div>
+                <div class="menu-button-desc">Например: D + 6 = ?</div>
+            </button>
+
+            <button class="menu-button" onclick="app.startExercise('interval_calculation')">
+                <div class="menu-button-title">📏 Вычисление интервалов</div>
+                <div class="menu-button-desc">Например: C → E = ?</div>
+            </button>
+
+            <button class="menu-button" onclick="app.startExercise('chord_decomposition')">
+                <div class="menu-button-title">🎸 Разложение аккордов</div>
+                <div class="menu-button-desc">Например: Am = ?</div>
+            </button>
+
+            <button class="menu-button" onclick="app.startExercise('tablature_reading')">
+                <div class="menu-button-title">📖 Чтение табулатур</div>
+                <div class="menu-button-desc">Читайте ноты с табулатуры</div>
+            </button>
+        </div>
+
+        <!-- Exercise Screen -->
+        <div id="exercise-screen" class="screen">
+            <h2 id="exercise-title">Упражнение</h2>
+
+            <div class="stats-container">
+                <div class="stats-row">
+                    <span class="stats-label">Правильно:</span>
+                    <span class="stats-value" id="correct-count">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Неправильно:</span>
+                    <span class="stats-value" id="incorrect-count">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Точность:</span>
+                    <span class="stats-value" id="accuracy">0%</span>
+                </div>
+            </div>
+
+            <div class="exercise-card">
+                <div id="key-info" class="key-info"></div>
+                <div id="question" class="question"></div>
+                <div id="tablature" class="tablature"></div>
+            </div>
+
+            <input type="text" id="answer-input" class="input-field" placeholder="Ваш ответ" autocomplete="off">
+
+            <div id="feedback" class="feedback" style="display: none;"></div>
+
+            <div class="button-group">
+                <button class="button secondary" onclick="app.showMenu()">← Меню</button>
+                <button class="button" onclick="app.submitAnswer()">Ответить</button>
+            </div>
+
+            <p class="help-text">Формат нот: C, C#, D, D#, E, F, F#, G, G#, A, A#, B<br>Можно использовать "." вместо "#"</p>
+        </div>
+
+        <!-- Statistics Screen -->
+        <div id="stats-screen" class="screen">
+            <h1>📊 Статистика</h1>
+
+            <div class="stats-container">
+                <div class="stats-row">
+                    <span class="stats-label">Всего примеров:</span>
+                    <span class="stats-value" id="final-total">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Правильных ответов:</span>
+                    <span class="stats-value" id="final-correct">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Неправильных ответов:</span>
+                    <span class="stats-value" id="final-incorrect">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Точность:</span>
+                    <span class="stats-value" id="final-accuracy">0%</span>
+                </div>
+            </div>
+
+            <button class="menu-button" onclick="app.showMenu()">← Вернуться в меню</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // DOMAIN LAYER - Core Music Theory Classes
+        // ============================================================================
+
+        class Note {
+            static CHROMATIC_SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+            constructor(name) {
+                const normalized = Note.normalize(name);
+                if (!Note.CHROMATIC_SCALE.includes(normalized)) {
+                    throw new Error(`Invalid note name: ${name}`);
+                }
+                this._index = Note.CHROMATIC_SCALE.indexOf(normalized);
+            }
+
+            static normalize(name) {
+                return name.trim().toUpperCase().replace(/\./g, '#');
+            }
+
+            static parse(input) {
+                return new Note(input);
+            }
+
+            static isValid(name) {
+                try {
+                    new Note(name);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+
+            addSemitones(semitones) {
+                const newIndex = (this._index + semitones) % 12;
+                return new Note(Note.CHROMATIC_SCALE[newIndex]);
+            }
+
+            subtractSemitones(semitones) {
+                return this.addSemitones(-semitones);
+            }
+
+            semitonesTo(other) {
+                return (other._index - this._index + 12) % 12;
+            }
+
+            toString() {
+                return Note.CHROMATIC_SCALE[this._index];
+            }
+
+            equals(other) {
+                return other instanceof Note && this._index === other._index;
+            }
+        }
+
+        class Interval {
+            constructor(semitones) {
+                if (!Interval.isValid(semitones)) {
+                    throw new Error(`Invalid interval: ${semitones}. Must be between 0 and 11.`);
+                }
+                this._semitones = semitones;
+            }
+
+            static isValid(semitones) {
+                return semitones >= 0 && semitones <= 11;
+            }
+
+            static between(note1, note2) {
+                return new Interval(note1.semitonesTo(note2));
+            }
+
+            applyTo(note) {
+                return note.addSemitones(this._semitones);
+            }
+
+            get semitones() {
+                return this._semitones;
+            }
+        }
+
+        const ChordType = {
+            MAJOR: [0, 4, 7],
+            MINOR: [0, 3, 7],
+            DOMINANT_7: [0, 4, 7, 10],
+            MINOR_7: [0, 3, 7, 10],
+            SUS2: [0, 2, 7],
+            SUS4: [0, 5, 7]
+        };
+
+        class Chord {
+            constructor(root, chordType) {
+                this._root = root;
+                this._chordType = chordType;
+            }
+
+            getNotes() {
+                return this._chordType.map(interval => this._root.addSemitones(interval));
+            }
+
+            toString() {
+                const rootStr = this._root.toString();
+                if (this._chordType === ChordType.MAJOR) return rootStr;
+                if (this._chordType === ChordType.MINOR) return `${rootStr}m`;
+                if (this._chordType === ChordType.DOMINANT_7) return `${rootStr}7`;
+                if (this._chordType === ChordType.MINOR_7) return `${rootStr}m7`;
+                if (this._chordType === ChordType.SUS2) return `${rootStr}sus2`;
+                if (this._chordType === ChordType.SUS4) return `${rootStr}sus4`;
+                return rootStr;
+            }
+
+            static parse(chordName) {
+                let name = chordName.trim().toUpperCase().replace(/\./g, '#');
+
+                if (name.length < 1) {
+                    throw new Error(`Invalid chord name: ${chordName}`);
+                }
+
+                let rootStr = name[0];
+                let suffix = name.substring(1);
+
+                if (suffix.startsWith('#')) {
+                    rootStr += '#';
+                    suffix = suffix.substring(1);
+                }
+
+                const root = new Note(rootStr);
+                const suffixLower = suffix.toLowerCase();
+
+                let chordType;
+                if (suffixLower === 'm7') chordType = ChordType.MINOR_7;
+                else if (suffixLower === 'm') chordType = ChordType.MINOR;
+                else if (suffixLower === '7') chordType = ChordType.DOMINANT_7;
+                else if (suffixLower === 'sus2') chordType = ChordType.SUS2;
+                else if (suffixLower === 'sus4') chordType = ChordType.SUS4;
+                else if (suffixLower === '') chordType = ChordType.MAJOR;
+                else throw new Error(`Unknown chord type: ${suffix}`);
+
+                return new Chord(root, chordType);
+            }
+
+            static formatNotes(notes) {
+                return notes.map(n => n.toString()).join('');
+            }
+        }
+
+        const KeyType = {
+            MAJOR: [0, 2, 4, 5, 7, 9, 11],
+            MINOR: [0, 2, 3, 5, 7, 8, 10]
+        };
+
+        class Key {
+            constructor(tonic, keyType) {
+                this._tonic = tonic;
+                this._keyType = keyType;
+            }
+
+            getScaleNotes() {
+                return this._keyType.map(interval => this._tonic.addSemitones(interval));
+            }
+
+            toString() {
+                const typeStr = this._keyType === KeyType.MAJOR ? 'major' : 'minor';
+                return `${this._tonic} ${typeStr}`;
+            }
+
+            static randomKey() {
+                const tonic = new Note(Note.CHROMATIC_SCALE[Math.floor(Math.random() * 12)]);
+                const keyType = Math.random() < 0.5 ? KeyType.MAJOR : KeyType.MINOR;
+                return new Key(tonic, keyType);
+            }
+        }
+
+        const InstrumentType = {
+            GUITAR: 'guitar',
+            UKULELE: 'ukulele'
+        };
+
+        class Tuning {
+            static GUITAR_STANDARD = [new Note('E'), new Note('A'), new Note('D'), new Note('G'), new Note('B'), new Note('E')];
+            static UKULELE_LOW_G = [new Note('G'), new Note('C'), new Note('E'), new Note('A')];
+
+            constructor(strings) {
+                this._strings = strings;
+            }
+
+            getNoteAt(stringIndex, fret) {
+                if (stringIndex < 0 || stringIndex >= this._strings.length) {
+                    throw new Error(`Invalid string index: ${stringIndex}`);
+                }
+                return this._strings[stringIndex].addSemitones(fret);
+            }
+
+            get numStrings() {
+                return this._strings.length;
+            }
+
+            static getStandardTuning(instrument) {
+                if (instrument === InstrumentType.GUITAR) {
+                    return new Tuning(Tuning.GUITAR_STANDARD);
+                } else if (instrument === InstrumentType.UKULELE) {
+                    return new Tuning(Tuning.UKULELE_LOW_G);
+                }
+                throw new Error(`Unknown instrument type: ${instrument}`);
+            }
+        }
+
+        class TablaturePosition {
+            constructor(string, fret, timestamp) {
+                this._string = string;
+                this._fret = fret;
+                this._timestamp = timestamp;
+            }
+
+            get string() { return this._string; }
+            get fret() { return this._fret; }
+            get timestamp() { return this._timestamp; }
+        }
+
+        class Tablature {
+            constructor(instrument, positions, key = null) {
+                this._instrument = instrument;
+                this._positions = positions.sort((a, b) => a.timestamp - b.timestamp);
+                this._tuning = Tuning.getStandardTuning(instrument);
+                this._key = key;
+            }
+
+            getNoteSequence() {
+                return this._positions.map(pos => this._tuning.getNoteAt(pos.string, pos.fret));
+            }
+
+            renderAscii() {
+                const numStrings = this._tuning.numStrings;
+                const maxTimestamp = Math.max(...this._positions.map(p => p.timestamp), 0);
+                const width = maxTimestamp + 3;
+
+                const lines = [];
+                for (let stringIdx = numStrings - 1; stringIdx >= 0; stringIdx--) {
+                    const line = Array(width).fill('-');
+                    for (const pos of this._positions) {
+                        if (pos.string === stringIdx) {
+                            const fretStr = pos.fret.toString();
+                            for (let i = 0; i < fretStr.length; i++) {
+                                if (pos.timestamp + i < width) {
+                                    line[pos.timestamp + i] = fretStr[i];
+                                }
+                            }
+                        }
+                    }
+                    lines.push(line.join(''));
+                }
+
+                return lines.join('\n');
+            }
+
+            static generate(instrument, key = null, length = 8, maxFretJump = 5) {
+                if (!key) key = Key.randomKey();
+
+                const tuning = Tuning.getStandardTuning(instrument);
+                const scaleNotes = key.getScaleNotes();
+                const positions = [];
+
+                function findPositionsForNote(note, maxFret = 22) {
+                    const result = [];
+                    for (let stringIdx = 0; stringIdx < tuning.numStrings; stringIdx++) {
+                        for (let fret = 0; fret <= maxFret; fret++) {
+                            if (tuning.getNoteAt(stringIdx, fret).equals(note)) {
+                                result.push([stringIdx, fret]);
+                            }
+                        }
+                    }
+                    return result;
+                }
+
+                const startNote = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+                const possibleStarts = findPositionsForNote(startNote);
+                let [currentString, currentFret] = possibleStarts[Math.floor(Math.random() * possibleStarts.length)];
+                positions.push(new TablaturePosition(currentString, currentFret, 0));
+
+                for (let i = 1; i < length; i++) {
+                    const nextNote = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+                    const possiblePositions = findPositionsForNote(nextNote);
+
+                    let validPositions = possiblePositions.filter(([stringIdx, fret]) => {
+                        if (currentFret === 0 || fret === 0) return true;
+                        return Math.abs(fret - currentFret) <= maxFretJump;
+                    });
+
+                    if (validPositions.length === 0) {
+                        validPositions = possiblePositions;
+                    }
+
+                    if (validPositions.length > 1) {
+                        const scoredPositions = validPositions.map(([stringIdx, fret]) => {
+                            const stringDistance = Math.abs(stringIdx - currentString);
+                            const fretDistance = (currentFret > 0 && fret > 0) ? Math.abs(fret - currentFret) : 0;
+                            const score = stringDistance * 2 + fretDistance;
+                            return { score, stringIdx, fret };
+                        });
+
+                        scoredPositions.sort((a, b) => a.score - b.score);
+                        const bestPositions = scoredPositions.slice(0, Math.min(3, scoredPositions.length));
+                        const chosen = bestPositions[Math.floor(Math.random() * bestPositions.length)];
+                        currentString = chosen.stringIdx;
+                        currentFret = chosen.fret;
+                    } else {
+                        [currentString, currentFret] = validPositions[Math.floor(Math.random() * validPositions.length)];
+                    }
+
+                    positions.push(new TablaturePosition(currentString, currentFret, i * 3));
+                }
+
+                return new Tablature(instrument, positions, key);
+            }
+
+            get key() { return this._key; }
+        }
+
+        // ============================================================================
+        // TRAINING LAYER - Exercise Types and Session Management
+        // ============================================================================
+
+        class Exercise {
+            constructor(type) {
+                this._type = type;
+            }
+
+            getType() {
+                return this._type;
+            }
+        }
+
+        class NoteArithmeticExercise extends Exercise {
+            constructor(note, interval, isAddition) {
+                super('note_arithmetic');
+                this._note = note;
+                this._interval = interval;
+                this._isAddition = isAddition;
+                this._answer = isAddition ? note.addSemitones(interval) : note.subtractSemitones(interval);
+            }
+
+            getQuestion() {
+                const operator = this._isAddition ? '+' : '-';
+                return `${this._note} ${operator} ${this._interval} = ?`;
+            }
+
+            checkAnswer(userInput) {
+                try {
+                    const userNote = Note.parse(userInput);
+                    return userNote.equals(this._answer);
+                } catch {
+                    return false;
+                }
+            }
+
+            getCorrectAnswer() {
+                return this._answer.toString();
+            }
+
+            static generate() {
+                const note = new Note(Note.CHROMATIC_SCALE[Math.floor(Math.random() * 12)]);
+                const interval = Math.floor(Math.random() * 11) + 1;
+                const isAddition = Math.random() < 0.5;
+                return new NoteArithmeticExercise(note, interval, isAddition);
+            }
+        }
+
+        class IntervalCalculationExercise extends Exercise {
+            constructor(note1, note2) {
+                super('interval_calculation');
+                this._note1 = note1;
+                this._note2 = note2;
+                this._answer = note1.semitonesTo(note2);
+            }
+
+            getQuestion() {
+                return `${this._note1} → ${this._note2} = ?`;
+            }
+
+            checkAnswer(userInput) {
+                try {
+                    const userInterval = parseInt(userInput.trim());
+                    return userInterval === this._answer;
+                } catch {
+                    return false;
+                }
+            }
+
+            getCorrectAnswer() {
+                return this._answer.toString();
+            }
+
+            static generate() {
+                let note1 = new Note(Note.CHROMATIC_SCALE[Math.floor(Math.random() * 12)]);
+                let note2 = new Note(Note.CHROMATIC_SCALE[Math.floor(Math.random() * 12)]);
+
+                while (note1.equals(note2)) {
+                    note2 = new Note(Note.CHROMATIC_SCALE[Math.floor(Math.random() * 12)]);
+                }
+
+                return new IntervalCalculationExercise(note1, note2);
+            }
+        }
+
+        class ChordDecompositionExercise extends Exercise {
+            constructor(chord) {
+                super('chord_decomposition');
+                this._chord = chord;
+                this._answerNotes = chord.getNotes();
+            }
+
+            getQuestion() {
+                return `${this._chord} = ?`;
+            }
+
+            checkAnswer(userInput) {
+                const normalized = userInput.trim().toUpperCase().replace(/\./g, '#').replace(/\s/g, '');
+
+                if (!normalized) return false;
+
+                try {
+                    const userNotes = [];
+                    let i = 0;
+                    while (i < normalized.length) {
+                        if (i + 1 < normalized.length && normalized[i + 1] === '#') {
+                            userNotes.push(new Note(normalized.substring(i, i + 2)));
+                            i += 2;
+                        } else {
+                            userNotes.push(new Note(normalized[i]));
+                            i += 1;
+                        }
+                    }
+
+                    if (userNotes.length !== this._answerNotes.length) return false;
+
+                    return userNotes.every((note, idx) => note.equals(this._answerNotes[idx]));
+                } catch {
+                    return false;
+                }
+            }
+
+            getCorrectAnswer() {
+                return this._answerNotes.map(n => n.toString()).join(' ');
+            }
+
+            static generate() {
+                const root = new Note(Note.CHROMATIC_SCALE[Math.floor(Math.random() * 12)]);
+                const chordTypes = [ChordType.MAJOR, ChordType.MINOR, ChordType.DOMINANT_7, ChordType.MINOR_7, ChordType.SUS2, ChordType.SUS4];
+                const chordType = chordTypes[Math.floor(Math.random() * chordTypes.length)];
+                const chord = new Chord(root, chordType);
+                return new ChordDecompositionExercise(chord);
+            }
+        }
+
+        class TablatureReadingExercise extends Exercise {
+            constructor(tablature, tuning) {
+                super('tablature_reading');
+                this._tablature = tablature;
+                this._tuning = tuning;
+                this._answerNotes = tablature.getNoteSequence();
+            }
+
+            getQuestion() {
+                return this._tablature.renderAscii();
+            }
+
+            getKeyInfo() {
+                return this._tablature.key ? `Тональность: ${this._tablature.key}` : '';
+            }
+
+            checkAnswer(userInput) {
+                const normalized = userInput.trim().toUpperCase().replace(/\./g, '#').replace(/\s/g, '');
+
+                if (!normalized) return false;
+
+                try {
+                    const userNotes = [];
+                    let i = 0;
+                    while (i < normalized.length) {
+                        if (i + 1 < normalized.length && normalized[i + 1] === '#') {
+                            userNotes.push(new Note(normalized.substring(i, i + 2)));
+                            i += 2;
+                        } else {
+                            userNotes.push(new Note(normalized[i]));
+                            i += 1;
+                        }
+                    }
+
+                    if (userNotes.length !== this._answerNotes.length) return false;
+
+                    return userNotes.every((note, idx) => note.equals(this._answerNotes[idx]));
+                } catch {
+                    return false;
+                }
+            }
+
+            getCorrectAnswer() {
+                return this._answerNotes.map(n => n.toString()).join(' ');
+            }
+
+            static generate(instrument = InstrumentType.GUITAR) {
+                const length = Math.floor(Math.random() * 5) + 6;
+                const tablature = Tablature.generate(instrument, null, length);
+                const tuning = Tuning.getStandardTuning(instrument);
+                return new TablatureReadingExercise(tablature, tuning);
+            }
+        }
+
+        class ExerciseGenerator {
+            static generate(exerciseType) {
+                switch (exerciseType) {
+                    case 'note_arithmetic':
+                        return NoteArithmeticExercise.generate();
+                    case 'interval_calculation':
+                        return IntervalCalculationExercise.generate();
+                    case 'chord_decomposition':
+                        return ChordDecompositionExercise.generate();
+                    case 'tablature_reading':
+                        return TablatureReadingExercise.generate();
+                    default:
+                        throw new Error(`Unknown exercise type: ${exerciseType}`);
+                }
+            }
+        }
+
+        class SessionStatistics {
+            constructor() {
+                this._correct = 0;
+                this._incorrect = 0;
+            }
+
+            recordResult(isCorrect) {
+                if (isCorrect) {
+                    this._correct++;
+                } else {
+                    this._incorrect++;
+                }
+            }
+
+            getCorrectCount() {
+                return this._correct;
+            }
+
+            getIncorrectCount() {
+                return this._incorrect;
+            }
+
+            getTotalCount() {
+                return this._correct + this._incorrect;
+            }
+
+            getAccuracy() {
+                const total = this.getTotalCount();
+                if (total === 0) return 0;
+                return (this._correct / total) * 100;
+            }
+
+            reset() {
+                this._correct = 0;
+                this._incorrect = 0;
+            }
+        }
+
+        class TrainingSession {
+            constructor(exerciseType) {
+                this._exerciseType = exerciseType;
+                this._statistics = new SessionStatistics();
+                this._currentExercise = null;
+            }
+
+            getNextExercise() {
+                this._currentExercise = ExerciseGenerator.generate(this._exerciseType);
+                return this._currentExercise;
+            }
+
+            submitAnswer(userInput) {
+                if (!this._currentExercise) {
+                    throw new Error('No current exercise');
+                }
+
+                const isCorrect = this._currentExercise.checkAnswer(userInput);
+                this._statistics.recordResult(isCorrect);
+
+                return {
+                    isCorrect,
+                    correctAnswer: this._currentExercise.getCorrectAnswer()
+                };
+            }
+
+            getStatistics() {
+                return this._statistics;
+            }
+
+            reset() {
+                this._statistics.reset();
+                this._currentExercise = null;
+            }
+        }
+
+        // ============================================================================
+        // APPLICATION LAYER - UI Management
+        // ============================================================================
+
+        class MusicIntervalsApp {
+            constructor() {
+                this.tg = window.Telegram.WebApp;
+                this.session = null;
+                this.currentExercise = null;
+                this.init();
+            }
+
+            init() {
+                this.tg.ready();
+                this.tg.expand();
+
+                this.tg.BackButton.onClick(() => this.showMenu());
+
+                const input = document.getElementById('answer-input');
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.submitAnswer();
+                    }
+                });
+
+                this.showScreen('menu-screen');
+            }
+
+            showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById(screenId).classList.add('active');
+            }
+
+            showMenu() {
+                this.showScreen('menu-screen');
+                this.tg.BackButton.hide();
+
+                if (this.session) {
+                    this.session.reset();
+                    this.session = null;
+                }
+            }
+
+            startExercise(exerciseType) {
+                const titles = {
+                    'note_arithmetic': '🎹 Арифметика нот',
+                    'interval_calculation': '📏 Вычисление интервалов',
+                    'chord_decomposition': '🎸 Разложение аккордов',
+                    'tablature_reading': '📖 Чтение табулатур'
+                };
+
+                document.getElementById('exercise-title').textContent = titles[exerciseType];
+
+                this.session = new TrainingSession(exerciseType);
+                this.showScreen('exercise-screen');
+                this.tg.BackButton.show();
+
+                this.updateStatistics();
+                this.nextExercise();
+            }
+
+            nextExercise() {
+                if (!this.session) return;
+
+                this.currentExercise = this.session.getNextExercise();
+
+                const questionEl = document.getElementById('question');
+                const tablatureEl = document.getElementById('tablature');
+                const keyInfoEl = document.getElementById('key-info');
+                const inputEl = document.getElementById('answer-input');
+
+                inputEl.value = '';
+                inputEl.disabled = false;
+                inputEl.focus();
+
+                if (this.currentExercise instanceof TablatureReadingExercise) {
+                    questionEl.style.display = 'none';
+                    tablatureEl.style.display = 'block';
+                    tablatureEl.textContent = this.currentExercise.getQuestion();
+                    keyInfoEl.textContent = this.currentExercise.getKeyInfo();
+                } else {
+                    questionEl.style.display = 'flex';
+                    tablatureEl.style.display = 'none';
+                    keyInfoEl.textContent = '';
+                    questionEl.textContent = this.currentExercise.getQuestion();
+                }
+            }
+
+            submitAnswer() {
+                if (!this.session || !this.currentExercise) return;
+
+                const inputEl = document.getElementById('answer-input');
+                const userInput = inputEl.value.trim();
+
+                if (!userInput) {
+                    this.tg.showAlert('Пожалуйста, введите ответ');
+                    return;
+                }
+
+                const result = this.session.submitAnswer(userInput);
+                this.showFeedback(result.isCorrect, result.correctAnswer);
+                this.updateStatistics();
+
+                if (result.isCorrect) {
+                    this.tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    this.tg.HapticFeedback.notificationOccurred('error');
+                }
+
+                // Сразу показываем следующий вопрос
+                this.nextExercise();
+            }
+
+            showFeedback(isCorrect, correctAnswer) {
+                const feedbackEl = document.getElementById('feedback');
+
+                // Убираем предыдущий класс show, если он есть
+                feedbackEl.classList.remove('show');
+
+                if (isCorrect) {
+                    feedbackEl.className = 'feedback correct';
+                    feedbackEl.textContent = '✓ Правильно!';
+                } else {
+                    feedbackEl.className = 'feedback incorrect';
+                    feedbackEl.textContent = `✗ Неправильно. Правильный ответ: ${correctAnswer}`;
+                }
+
+                // Показываем элемент
+                feedbackEl.style.display = 'block';
+
+                // Показываем toast с анимацией
+                setTimeout(() => {
+                    feedbackEl.classList.add('show');
+                }, 10);
+
+                // Скрываем toast через 20 секунд
+                setTimeout(() => {
+                    feedbackEl.classList.remove('show');
+                    // Полностью скрываем элемент после завершения анимации
+                    setTimeout(() => {
+                        feedbackEl.style.display = 'none';
+                    }, 300); // 300ms - время transition из CSS
+                }, 20000);
+            }
+
+            updateStatistics() {
+                if (!this.session) return;
+
+                const stats = this.session.getStatistics();
+
+                document.getElementById('correct-count').textContent = stats.getCorrectCount();
+                document.getElementById('incorrect-count').textContent = stats.getIncorrectCount();
+                document.getElementById('accuracy').textContent = stats.getAccuracy().toFixed(1) + '%';
+            }
+
+            showStatistics() {
+                if (!this.session) return;
+
+                const stats = this.session.getStatistics();
+
+                document.getElementById('final-total').textContent = stats.getTotalCount();
+                document.getElementById('final-correct').textContent = stats.getCorrectCount();
+                document.getElementById('final-incorrect').textContent = stats.getIncorrectCount();
+                document.getElementById('final-accuracy').textContent = stats.getAccuracy().toFixed(1) + '%';
+
+                this.showScreen('stats-screen');
+                this.tg.BackButton.hide();
+            }
+        }
+
+        // Initialize app when DOM is ready
+        let app;
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                app = new MusicIntervalsApp();
+            });
+        } else {
+            app = new MusicIntervalsApp();
+        }
+    </script>
+</body>
+</html>
